@@ -94,7 +94,7 @@ public class ProtocolHandler {
             System.arraycopy(buffer,17,reg_mark,0,package_len-1);
             if (Arrays.equals(reg_mark,REG)){
                 int fileBufLength = 0;
-                String fileName = "/Users/yunba/Downloads/client.p12";
+                String fileName = "/etc/pki/CA/client.p12";
                 try {
                     byte[] fileBuf = fileToBytes(fileName);
                     fileBufLength = fileBuf.length;
