@@ -18,6 +18,7 @@ public class SocketServer {
 //    private final static Logger LOGGER = LoggerFactory.getLogger(SocketServer.class);
     private static int port = 8899; //监听端口号
 
+
     public void startAction(){
         ServerSocket serverSocket=null;
         try {
@@ -65,13 +66,14 @@ public class SocketServer {
                     in.read(buffer);
                     String asciiStr = ProtocolHandler.bytesToAscii(buffer,0,64);
 //                    lineString=reader.readLine();
+                    System.out.println("from socket: " + socket);
                     System.out.println("收到来自客户端的发送的消息：" + asciiStr);
-                    byte[] resp_buf = ProtocolHandler.decode(buffer);
+                    byte[] resp_buf = ProtocolHandler.decode(buffer,socket);
 //                    writer.flush();
 //                    !(lineString=reader.readLine()).equals("bye")
                     if (!(resp_buf == null)) {
                         out.write(resp_buf);
-                        System.out.println("服务器返回：" + ProtocolHandler.bytesToAscii(resp_buf,0,32));
+                        System.out.println("服务器返回：" + ProtocolHandler.bytesToAscii(resp_buf,0,resp_buf.length));
                     }  else {
                         System.out.println("收到来自客户端的发送的错误消息，断开连接");
                         break;
