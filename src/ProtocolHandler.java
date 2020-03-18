@@ -87,57 +87,66 @@ public class ProtocolHandler {
 
         if (buffer[2] == 0x2a) // *
         {
-            byte[] device_id_buffer =  new byte[10];
-            System.arraycopy(buffer, 3, device_id_buffer, 0, 10);
-            device_id = bytesToAscii(device_id_buffer,0,10);
+            int bike_id_index;
+            for (bike_id_index = 3; bike_id_index <= buffer.length; bike_id_index++){
+                 if (buffer[bike_id_index] == 0x2a){
+                     break;
+                 }
+            }
+            if (bike_id_index >= buffer.length) return null;
+            byte[] device_id_buffer =  new byte[bike_id_index-3];
+            System.arraycopy(buffer, 3, device_id_buffer, 0, bike_id_index-3);
+            device_id = bytesToAscii(device_id_buffer,0,device_id_buffer.length);
             System.out.println("device id: " + device_id);
             deviceSocketMap.put(device_id,socket);
 //            System.out.println("socket: " + deviceSocketMap.get(device_id));
-        } else return null;
 
-        if (buffer[13] == 0x2a) {
-            byte[] len_byte =  new byte[2];
-            System.arraycopy(buffer, 14, len_byte, 0, 2);
-            package_len = (buffer[14] << 8) + buffer[15];
+            byte[] len_byte =  new byte[4];
+            System.arraycopy(buffer, bike_id_index+1, len_byte, 0, 4);
+            package_len = Integer.parseInt(bytesToAscii(len_byte,0,len_byte.length));
             System.out.println("package length: " + package_len);
+
+            byte REG[] = {0x52, 0x45, 0x47};
+            byte CON[] = {0x43, 0x4f, 0x4E};
+            if (buffer[bike_id_index+5] == 0x2a) {
+                byte[] ins_mark = new byte[package_len];
+                System.arraycopy(buffer,bike_id_index+6,ins_mark,0,package_len);
+                if (Arrays.equals(ins_mark,REG)){
+                    // 注册
+                    return reg(buffer,bike_id_index);
+                } else if (Arrays.equals(ins_mark,CON)){
+                    // 建立连接
+                    return connect(buffer,socket);
+                }
+            }
+
         } else return null;
 
-        byte REG[] = {0x52, 0x45, 0x47};
-        byte CON[] = {0x43, 0x4f, 0x4E};
-        if (buffer[16] == 0x2a) {
-            byte[] ins_mark = new byte[package_len-1];
-            System.arraycopy(buffer,17,ins_mark,0,package_len-1);
-            if (Arrays.equals(ins_mark,REG)){
-                // 注册
-                return reg(buffer);
-            } else if (Arrays.equals(ins_mark,CON)){
-                // 建立连接
-                return connect(buffer,socket);
-            }
-        }
         return null;
     }
 
-    private static byte[] reg(byte[] buffer) {
+    private static byte[] reg(byte[] buffer, int bike_id_index) {
         int fileBufLength = 0;
-//                String fileName = "/etc/pki/CA/client.p12";   // abj-gateway-1
-        String fileName = "/Users/yunba/Downloads/client.p12";   //localhost
+                String fileName = "/etc/pki/CA/client.p12";   // abj-gateway-1
+//        String fileName = "/Users/yunba/Downloads/client.p12";   //localhost
         try {
             byte[] fileBuf = fileToBytes(fileName);
             fileBufLength = fileBuf.length;
 
-            byte[] resp_buffer = new byte[21+fileBufLength];
-            System.arraycopy(buffer, 0, resp_buffer, 0, 14);
-            int resp_buffer_len = 5+fileBufLength;
-            resp_buffer[14] = (byte) (resp_buffer_len >> 8);
-            resp_buffer[15] = (byte) (resp_buffer_len % 256);
-            resp_buffer[16] = 0x2a;
-            System.arraycopy(buffer, 17, resp_buffer, 17, 3);
-            resp_buffer[20] = 0x2c;   //,
+            byte[] resp_buffer = new byte[10+bike_id_index+fileBufLength];
+            System.arraycopy(buffer, 0, resp_buffer, 0, bike_id_index+9);
+//            CS*0102030405*LEN*REG
+            int resp_buffer_len = 4+fileBufLength;
+            String resp_len_str = String.format("%04d", resp_buffer_len);
+            byte[] byteArray = resp_len_str.getBytes();
+            System.arraycopy(byteArray, 0, resp_buffer, bike_id_index+1, 4);
+//            change LEN
+            resp_buffer[bike_id_index+9] = 0x2c;   //,
+//            CS*0102030405*LEN*REG,
 
-            System.arraycopy(fileBuf,0,resp_buffer,21,fileBufLength);
+            System.arraycopy(fileBuf,0,resp_buffer,bike_id_index+10,fileBufLength);
 
-            String resp_str = bytesToAscii(resp_buffer,0,21);
+            String resp_str = bytesToAscii(resp_buffer,0,32);
             System.out.println("resp str: " + resp_str);
 
             return resp_buffer;
