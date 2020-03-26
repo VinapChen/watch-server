@@ -72,8 +72,9 @@ public class SocketServer {
 //                    writer.flush();
 //                    !(lineString=reader.readLine()).equals("bye")
                     if (!(resp_buf == null)) {
-                        out.write(resp_buf);
-                        System.out.println("服务器返回：" + ProtocolHandler.bytesToAscii(resp_buf,0,resp_buf.length));
+                        byte[] resp_buffer = ProtocolHandler.addBrackets(resp_buf);
+                        out.write(resp_buffer);
+                        System.out.println("服务器返回：" + ProtocolHandler.bytesToAscii(resp_buffer,0,resp_buffer.length));
                     }  else {
                         System.out.println("收到来自客户端的发送的错误消息，断开连接");
                         break;

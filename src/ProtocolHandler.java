@@ -12,7 +12,10 @@ public class ProtocolHandler {
     private static Map<Socket ,Boolean> deviceConnectedMap = new HashMap<Socket, Boolean>(); // 保存连接对象
 
 
-    public static byte[] decode(byte[] buffer, Socket socket){
+    public static byte[] decode(byte[] buf, Socket socket){
+
+        byte[] buffer = rmBrackets(buf);
+        if (buffer == null) return null;
         byte[] cmd = new byte[2];
         System.arraycopy(buffer, 0, cmd, 0, 2);
 
@@ -36,6 +39,27 @@ public class ProtocolHandler {
             }
         }
         return null;
+    }
+
+    private static byte[] rmBrackets (byte[] buf) {
+        // rm []
+        if (buf[0] == 0x5b) {
+            int i = 1;
+            while (buf[i++] != 0x5d) ;
+            byte[] buffer = new byte[i - 2];
+            System.arraycopy(buf,1,buffer,0,buffer.length);
+            return buffer;
+        }
+        return null;
+    }
+
+    public static byte[] addBrackets (byte[] buf) {
+        // add []
+        byte[] buffer = new byte[buf.length+2];
+        buffer[0] = 0x5b;
+        buffer[buffer.length - 1] = 0x5d;
+        System.arraycopy(buf,0,buffer,1,buf.length);
+        return buffer;
     }
 
     private static byte[] setIP (byte[] buffer) {
