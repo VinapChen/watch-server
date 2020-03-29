@@ -127,7 +127,7 @@ public class ProtocolHandler {
 
             byte[] len_byte =  new byte[4];
             System.arraycopy(buffer, bike_id_index+1, len_byte, 0, 4);
-            package_len = Integer.parseInt(bytesToAscii(len_byte,0,len_byte.length));
+            package_len = Integer.parseInt(bytesToAscii(len_byte,0,len_byte.length),16);
             System.out.println("package length: " + package_len);
 
             byte REG[] = {0x52, 0x45, 0x47};
@@ -161,7 +161,11 @@ public class ProtocolHandler {
             System.arraycopy(buffer, 0, resp_buffer, 0, bike_id_index+9);
 //            CS*0102030405*LEN*REG
             int resp_buffer_len = 4+fileBufLength;
-            String resp_len_str = String.format("%04d", resp_buffer_len);
+            String resp_len_str =  Integer.toHexString(resp_buffer_len);
+            while (resp_len_str.length() < 4) {
+                resp_len_str = "0" + resp_len_str;
+            }
+//            String resp_len_str = String.format("%04d", resp_buffer_len);
             byte[] byteArray = resp_len_str.getBytes();
             System.arraycopy(byteArray, 0, resp_buffer, bike_id_index+1, 4);
 //            change LEN
