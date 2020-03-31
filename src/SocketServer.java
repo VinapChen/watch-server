@@ -3,6 +3,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //
@@ -54,23 +55,20 @@ public class SocketServer {
 
         public void run() {
             try {
-//                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));//读取客户端消息  
-//                writer=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));//向客户端写消息
-//                String lineString="";
-                InputStream in = socket.getInputStream();
-                OutputStream out = socket.getOutputStream();
-                byte[] buffer = new byte[64];
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));//读取客户端消息  
+//                writer=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));//向客户端写消息  写str
+//                InputStream in = socket.getInputStream();
+                OutputStream out = socket.getOutputStream();    //写bytes
+//                byte[] buf = new byte[64];
 
-
-                while(true){
-                    in.read(buffer);
-                    String asciiStr = ProtocolHandler.bytesToAscii(buffer,0,64);
-//                    lineString=reader.readLine();
+                String s = null;
+                while((s = readLine_customize()) != null){
                     System.out.println("from socket: " + socket);
-                    System.out.println("收到来自客户端的发送的消息：" + asciiStr);
+                    System.out.println("收到来自客户端的发送的消息：" + s);
+//                    in.read(buf);
+                    byte[] buf = s.getBytes();
+                    byte[] buffer = ProtocolHandler.rmBrackets(buf);
                     byte[] resp_buf = ProtocolHandler.decode(buffer,socket);
-//                    writer.flush();
-//                    !(lineString=reader.readLine()).equals("bye")
                     if (!(resp_buf == null)) {
                         byte[] resp_buffer = ProtocolHandler.addBrackets(resp_buf);
                         out.write(resp_buffer);
@@ -99,6 +97,26 @@ public class SocketServer {
                 }
             }
         }
+
+        private String readLine_customize() throws IOException {
+            StringBuilder sb = new StringBuilder();
+            int ch = 0;
+            while ((ch = this.reader.read()) != -1) {//104,101,108,108,111
+                if(ch == ']'){
+                    sb.append((char)ch);
+                    return sb.toString();
+                }else{
+                    sb.append((char)ch);
+                }
+
+//                //为了防止数据丢失,判断sb的长度不能大于0
+//                if(sb.length() > 0){
+//                    return sb.toString();
+//                }
+            }
+            return null;
+        }
+
     }
 
 }
