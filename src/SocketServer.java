@@ -24,7 +24,7 @@ public class SocketServer {
         ServerSocket serverSocket=null;
         try {
             serverSocket=new ServerSocket(port); //端口号
-            System.out.println("服务端服务启动监听：" + port);
+            System.out.println("Server listening：" + port);
             //通过死循环开启长连接，开启线程去处理消息
             while(true){
                 Socket socket=serverSocket.accept();
@@ -64,7 +64,7 @@ public class SocketServer {
                 String s = null;
                 while((s = readLine_customize()) != null){
                     System.out.println("from socket: " + socket);
-                    System.out.println("收到来自客户端的发送的消息：" + s);
+                    System.out.println("Received a message from the client：" + s);
 //                    in.read(buf);
                     byte[] buf = s.getBytes();
                     byte[] buffer = ProtocolHandler.rmBrackets(buf);
@@ -72,9 +72,12 @@ public class SocketServer {
                     if (!(resp_buf == null)) {
                         byte[] resp_buffer = ProtocolHandler.addBrackets(resp_buf);
                         out.write(resp_buffer);
-                        System.out.println("服务器返回：" + ProtocolHandler.bytesToAscii(resp_buffer,0,resp_buffer.length));
+                        out.flush();//清空缓存区的内容
+
+                        System.out.println("Servers response：");
+                        System.out.println(ProtocolHandler.bytesToAscii(resp_buffer,0,resp_buffer.length));
                     }  else {
-                        System.out.println("收到来自客户端的发送的错误消息，断开连接");
+                        System.out.println("Received an error message from the client, disconnected");
                         break;
                     }
                 }

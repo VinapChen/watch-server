@@ -156,6 +156,7 @@ public class ProtocolHandler {
         try {
             byte[] fileBuf = fileToBytes(fileName);
             fileBufLength = fileBuf.length;
+            System.out.println("file length:" + fileBufLength);
 
             byte[] resp_buffer = new byte[10+bike_id_index+fileBufLength];
             System.arraycopy(buffer, 0, resp_buffer, 0, bike_id_index+9);
@@ -174,8 +175,13 @@ public class ProtocolHandler {
 
             System.arraycopy(fileBuf,0,resp_buffer,bike_id_index+10,fileBufLength);
 
-            String resp_str = bytesToAscii(resp_buffer,0,32);
-            System.out.println("resp str: " + resp_str);
+            for (int i = 0; i<resp_buffer.length; i++){
+                if (resp_buffer[i] == 0x5d){
+                    resp_buffer[i] = 0x5a;
+                }
+            }
+            String resp_str = bytesToAscii(resp_buffer,0,resp_buffer.length);
+            System.out.println("resp str: \n" + resp_str);
 
             return resp_buffer;
 
