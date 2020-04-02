@@ -175,11 +175,6 @@ public class ProtocolHandler {
 
             System.arraycopy(fileBuf,0,resp_buffer,bike_id_index+10,fileBufLength);
 
-            for (int i = 0; i<resp_buffer.length; i++){
-                if (resp_buffer[i] == 0x5d){
-                    resp_buffer[i] = 0x5a;
-                }
-            }
             String resp_str = bytesToAscii(resp_buffer,0,resp_buffer.length);
             System.out.println("resp str:\n=========================");
             System.out.println(resp_str);

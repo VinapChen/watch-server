@@ -55,28 +55,29 @@ public class SocketServer {
 
         public void run() {
             try {
-                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));//读取客户端消息  
+//                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));//读取客户端消息  
 //                writer=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));//向客户端写消息  写str
-//                InputStream in = socket.getInputStream();
+                InputStream in = socket.getInputStream();
                 OutputStream out = socket.getOutputStream();    //写bytes
-//                byte[] buf = new byte[64];
+                byte[] buf = new byte[64];
 
-                String s = null;
-                while((s = readLine_customize()) != null){
+//                String s = null;
+                while(true){
                     System.out.println("from socket: " + socket);
-                    System.out.println("Received a message from the client:" + s);
-//                    in.read(buf);
-                    byte[] buf = s.getBytes();
-                    byte[] buffer = ProtocolHandler.rmBrackets(buf);
-                    byte[] resp_buf = ProtocolHandler.decode(buffer,socket);
+                    in.read(buf);
+                    System.out.println("Received a message from the client:" + ProtocolHandler.bytesToAscii(buf,0,buf.length));
+
+//                    byte[] buf = s.getBytes();
+//                    byte[] buffer = ProtocolHandler.rmBrackets(buf);
+                    byte[] resp_buf = ProtocolHandler.decode(buf,socket);
                     if (!(resp_buf == null)) {
-                        byte[] resp_buffer = ProtocolHandler.addBrackets(resp_buf);
-                        out.write(resp_buffer);
+//                        byte[] resp_buffer = ProtocolHandler.addBrackets(resp_buf);
+                        out.write(resp_buf);
                         out.flush();//清空缓存区的内容
 
                         System.out.println("Servers response:");
                         System.out.println("=========================");
-                        System.out.println(ProtocolHandler.bytesToAscii(resp_buffer,0,resp_buffer.length));
+                        System.out.println(ProtocolHandler.bytesToAscii(resp_buf,0,resp_buf.length));
                         System.out.println("=========================");
                     }  else {
                         System.out.println("Received an error message from the client, disconnected");
