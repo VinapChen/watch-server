@@ -181,7 +181,9 @@ public class ProtocolHandler {
                 }
             }
             String resp_str = bytesToAscii(resp_buffer,0,resp_buffer.length);
-            System.out.println("resp str: \n" + resp_str);
+            System.out.println("resp str:\n=========================");
+            System.out.println(resp_str);
+            System.out.println("=========================");
 
             return resp_buffer;
 

@@ -75,7 +75,9 @@ public class SocketServer {
                         out.flush();//清空缓存区的内容
 
                         System.out.println("Servers response:");
+                        System.out.println("=========================");
                         System.out.println(ProtocolHandler.bytesToAscii(resp_buffer,0,resp_buffer.length));
+                        System.out.println("=========================");
                     }  else {
                         System.out.println("Received an error message from the client, disconnected");
                         break;
