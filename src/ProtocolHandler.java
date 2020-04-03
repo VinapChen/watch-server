@@ -12,10 +12,22 @@ public class ProtocolHandler {
     private static Map<Socket ,Boolean> deviceConnectedMap = new HashMap<Socket, Boolean>(); // 保存连接对象
 
 
-    public static byte[] decode(byte[] buffer, Socket socket){
+    public static byte[] decode(byte[] buf, Socket socket){
+
+        int buf_len = 0;
+        while (buf_len < buf.length){
+//            判断有效包内容
+            if (buf[buf_len++] == 0){
+                break;
+            }
+        }
+        buf_len -= 1;
+        System.out.println("The msg length:" + buf_len);
+        byte[] buffer = new byte[buf_len];
+        System.arraycopy(buf, 0, buffer, 0, buf_len);
 
 //        byte[] buffer = rmBrackets(buf);
-        if (buffer == null) return null;
+        if (buffer.length < 2) return null;
         byte[] cmd = new byte[2];
         System.arraycopy(buffer, 0, cmd, 0, 2);
 
@@ -26,17 +38,17 @@ public class ProtocolHandler {
         if (Arrays.equals(cmd, MT)) {
             return setIP(buffer);
         } else if (Arrays.equals(cmd, CS)) {
-            try {
-                boolean connected = deviceConnectedMap.get(socket);
-
-                if (connected)
-                    return null;  //已经建立加密通道连接
-                else
-                    return insParseUnconnected(buffer, socket);     //尚未建立加密通道连接
-            }
-            catch (Exception e) {
+//            try {
+//                boolean connected = deviceConnectedMap.get(socket);
+//
+//                if (connected)
+//                    return null;  //已经建立加密通道连接
+//                else
+//                    return insParseUnconnected(buffer, socket);     //尚未建立加密通道连接
+//            }
+//            catch (Exception e) {
                 return insParseUnconnected(buffer, socket);     //尚未建立加密通道连接
-            }
+//            }
         }
         return null;
     }
@@ -190,11 +202,9 @@ public class ProtocolHandler {
 
     private static byte[] connect(byte[] buffer, Socket socket) {
         deviceConnectedMap.put(socket,true);
-        System.out.println("建立加密通道连接");
-        byte[] resp_buffer = new byte[20];
-        System.arraycopy(buffer,0,resp_buffer,0,20);
-//      [CS*YYYYYYYYYY*LEN*CON]
-        return resp_buffer;
+        System.out.println("Encrypted channel is established");
+//      [CS*YYYYYYYYYY*LEN*CON]  , 原样回复
+        return buffer;
     }
 
 
