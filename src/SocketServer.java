@@ -4,6 +4,9 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //
@@ -63,7 +66,10 @@ public class SocketServer {
 
 //                String s = null;
                 while(true){
-                    System.out.println("from socket: " + socket);
+                    Date d = new Date();
+                    DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    System.out.println();
+                    System.out.println("======"+sdf.format(d)+"======"+"from socket: " + socket);
                     in.read(buf);
                     System.out.println("Received a message from the client:" + ProtocolHandler.bytesToAscii(buf,0,buf.length));
 
