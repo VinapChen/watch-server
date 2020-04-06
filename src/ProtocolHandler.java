@@ -25,6 +25,7 @@ public class ProtocolHandler {
         System.out.println("The msg length:" + buf_len);
         byte[] buffer = new byte[buf_len];
         System.arraycopy(buf, 0, buffer, 0, buf_len);
+        System.out.println("To hex string:" + toHexString(buffer));
 
 //        byte[] buffer = rmBrackets(buf);
         if (buffer.length < 2) return null;
@@ -273,5 +274,21 @@ public class ProtocolHandler {
                 e.printStackTrace();
             }
         }
+    }
+
+
+    public static String toHexString(byte[] byteArray) {
+        final StringBuilder hexString = new StringBuilder("");
+        if (byteArray == null || byteArray.length <= 0)
+            return null;
+        for (int i = 0; i < byteArray.length; i++) {
+            int v = byteArray[i] & 0xFF;
+            String hv = Integer.toHexString(v);
+            if (hv.length() < 2) {
+                hexString.append(0);
+            }
+            hexString.append(hv);
+        }
+        return hexString.toString().toLowerCase();
     }
 }
